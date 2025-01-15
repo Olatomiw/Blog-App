@@ -2,6 +2,7 @@ package thelazycoder.blog_app.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 import thelazycoder.blog_app.repository.UserRepository;
 
@@ -26,19 +28,23 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
+        DefaultSecurityFilterChain filterChain =  http
+                .csrf(e->e.disable())
                 .cors(AbstractHttpConfigurer::disable)
-                .csrf(Customizer.withDefaults())
+                .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(e->e
-                    .requestMatchers("/").permitAll()
-                    .anyRequest().authenticated()
+                        .requestMatchers("/").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/signup").permitAll()
+                        .anyRequest().authenticated()
                 )
+                .authenticationProvider(authenticationProvider())
                 .build();
+        return filterChain;
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
+    public UserDetailsService userDetailsService(UserRepository userRepository) {
         return new CustomUserDetailsService(userRepository);
     }
 
@@ -50,7 +56,7 @@ public class SecurityConfig {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService());
+        authProvider.setUserDetailsService(userDetailsService(userRepository));
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }

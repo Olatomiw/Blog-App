@@ -2,6 +2,7 @@ package thelazycoder.blog_app.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,7 +29,7 @@ public class User {
     private String email;
     private String bio;
     @Column(nullable = false)
-    @Size(min = 8, max = 20)
+    @Size(min = 8, max = 100, message = "min 8, max 100")
     private String password;
     @Column(nullable = false)
     private String role;
@@ -41,4 +42,8 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime created;
 
+    @PrePersist
+    protected void onCreate() {
+        created = LocalDateTime.now();
+    }
 }
