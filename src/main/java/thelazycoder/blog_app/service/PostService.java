@@ -64,4 +64,11 @@ public class PostService {
         return new ResponseEntity<>(ResponseUtil.success(postResponse, "Successfully found post"),
                 HttpStatus.OK);
     }
+
+    @Transactional
+    public ResponseEntity<?> deletePostById(String id){
+        postRepository.deleteById(id);
+        return new ResponseEntity<>(ResponseUtil.success(null, "Successfully deleted post"), HttpStatus.OK);
+    }
+
 }
