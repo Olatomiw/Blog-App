@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.hateoas.EntityModel;
@@ -16,6 +17,7 @@ import thelazycoder.blog_app.service.PostService;
 @Tag(name = "POST API", description = "Endpoints for managing posts")
 @RestController
 @RequestMapping("/api/post")
+@SecurityRequirement(name = "basicAuth")
 public class PostController {
 
     private final PostService postService;
@@ -49,5 +51,10 @@ public class PostController {
     @GetMapping("/getPost/{id}")
     public ResponseEntity<?> getPost(@PathVariable String id) {
         return postService.getPostById(id);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deletePostById(@PathVariable String id){
+        return postService.deletePostById(id);
     }
 }
