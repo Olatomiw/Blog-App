@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import thelazycoder.blog_app.dto.UserDto;
+import thelazycoder.blog_app.dto.request.UserDto;
 import thelazycoder.blog_app.dto.response.ApiResponse;
 import thelazycoder.blog_app.dto.response.UserData;
 import thelazycoder.blog_app.exception.InvalidInputException;
@@ -31,13 +31,14 @@ public class UserService {
 
     @Transactional
     public ResponseEntity<?> signUp(UserDto userDto){
-        ModelMapper modelMapper = new ModelMapper(passwordEncoder);
+        ModelMapper modelMapper = new ModelMapper();
         User user = modelMapper.mapDtoToModel(userDto);
         try {
             user.setId(UUID.randomUUID().toString());
             user.setImage("my_image.png");
             user.setRole("ROLE_USER");
             user.setCreated(LocalDateTime.now());
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
             User validate = genericFieldValidator.validate(user);
             User save = userRepository.save(validate);
 

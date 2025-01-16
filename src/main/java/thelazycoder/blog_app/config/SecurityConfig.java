@@ -34,7 +34,7 @@ public class SecurityConfig {
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(e->e
-                        .requestMatchers("/").permitAll()
+                        .requestMatchers("/","/swagger-ui/**", "/v3/api-docs*/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/signup").permitAll()
                         .anyRequest().authenticated()
                 )

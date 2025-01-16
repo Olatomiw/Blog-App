@@ -3,7 +3,7 @@ package thelazycoder.blog_app.controller;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import thelazycoder.blog_app.dto.UserDto;
+import thelazycoder.blog_app.dto.request.UserDto;
 import thelazycoder.blog_app.exception.InvalidInputException;
 import thelazycoder.blog_app.service.UserService;
 
