@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import thelazycoder.blog_app.dto.request.PostRequestDto;
@@ -44,6 +43,19 @@ public class PostController {
         return postService.create(postRequestDto);
     }
 
+    @Operation(
+            summary = "Fetch Blog Post",
+            description = "This API fetches all the Post in the App",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Post created successfully",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = PostResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid input",
+                            content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
+                            content = @Content(mediaType = "application/json"))
+            }
+    )
     @GetMapping("/getAllPost")
     public ResponseEntity<?> getPosts() {
         return postService.findAllPost();

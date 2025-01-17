@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import thelazycoder.blog_app.dto.request.PostRequestDto;
 import thelazycoder.blog_app.dto.response.PostResponse;
+import thelazycoder.blog_app.exception.DuplicateEntityException;
 import thelazycoder.blog_app.exception.NoEntityFoundException;
 import thelazycoder.blog_app.mapper.ModelMapper;
 import thelazycoder.blog_app.model.Post;
@@ -20,6 +21,7 @@ import thelazycoder.blog_app.utils.ResponseUtil;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -39,6 +41,11 @@ public class PostService {
         post.setCreatedAt(LocalDateTime.now());
         post.setUpdatedAt(LocalDateTime.now());
         Post validated = genericFieldValidator.validate(post);
+        Optional<Post> byTitleAndAuthorId = postRepository.findByTitleAndAuthorId(post.getTitle(), loggedInUser.getId());
+        if (byTitleAndAuthorId.isPresent()){
+            throw new DuplicateEntityException("Change your post topic");
+        }
+
         Post savePost = postRepository.save(validated);
         PostResponse postResponse = ModelMapper.mapToPostResponse(savePost);
             return new ResponseEntity<>(ResponseUtil.success(postResponse, "Successfully created"), HttpStatus.OK);
