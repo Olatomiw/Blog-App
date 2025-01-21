@@ -35,16 +35,11 @@ public class PostService {
     @Transactional
     public ResponseEntity<?> create(PostRequestDto postRequestDto){
         User loggedInUser = infoGetter.getLoggedInUser();
-        Post post = ModelMapper.mapToPost(postRequestDto);
-        post.setId(UUID.randomUUID().toString());
-        post.setAuthor(loggedInUser);
-        post.setCreatedAt(LocalDateTime.now());
-        post.setUpdatedAt(LocalDateTime.now());
+
+        Post post = createPost(postRequestDto, loggedInUser);
         Post validated = genericFieldValidator.validate(post);
-        Optional<Post> byTitleAndAuthorId = postRepository.findByTitleAndAuthorId(post.getTitle(), loggedInUser.getId());
-        if (byTitleAndAuthorId.isPresent()){
-            throw new DuplicateEntityException("Change your post topic");
-        }
+
+        checkDuplicateTitle(post.getTitle(), loggedInUser.getId());
 
         Post savePost = postRepository.save(validated);
         PostResponse postResponse = ModelMapper.mapToPostResponse(savePost);
@@ -78,4 +73,20 @@ public class PostService {
         return new ResponseEntity<>(ResponseUtil.success(null, "Successfully deleted post"), HttpStatus.OK);
     }
 
+
+
+    public void checkDuplicateTitle(String title, String author){
+        Optional<Post> byTitleAndAuthorId = postRepository.findByTitleAndAuthorId(title, author);
+        if (byTitleAndAuthorId.isPresent()){
+            throw new DuplicateEntityException("Change your post topic");
+        }
+    }
+    public Post createPost(PostRequestDto postRequestDto, User loggedInUser){
+        Post post = ModelMapper.mapToPost(postRequestDto);
+        post.setId(UUID.randomUUID().toString());
+        post.setAuthor(loggedInUser);
+        post.setCreatedAt(LocalDateTime.now());
+        post.setUpdatedAt(LocalDateTime.now());
+        return post;
+    }
 }
