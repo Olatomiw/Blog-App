@@ -75,9 +75,11 @@ public class PostService {
 
 
 
-    public void checkDuplicateTitle(String title, String author){
-        Optional<Post> byTitleAndAuthorId = postRepository.findByTitleAndAuthorId(title, author);
+    public void checkDuplicateTitle(String title, String authorId){
+        System.out.println("Checking for duplicate title: " + title + " for author: " + authorId);
+        Optional<Post> byTitleAndAuthorId = postRepository.findByTitleAndAuthorId(title, authorId);
         if (byTitleAndAuthorId.isPresent()){
+            System.out.println("Duplicate found!");
             throw new DuplicateEntityException("Change your post topic");
         }
     }

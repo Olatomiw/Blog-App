@@ -10,6 +10,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 import thelazycoder.blog_app.dto.request.PostRequestDto;
 import thelazycoder.blog_app.dto.response.PostResponse;
+import thelazycoder.blog_app.exception.DuplicateEntityException;
 import thelazycoder.blog_app.model.Post;
 import thelazycoder.blog_app.model.User;
 import thelazycoder.blog_app.repository.PostRepository;
@@ -19,7 +20,7 @@ import thelazycoder.blog_app.utils.InfoGetter;
 import thelazycoder.blog_app.utils.ResponseUtil;
 
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -50,7 +51,7 @@ class PostServiceTest {
         MockitoAnnotations.openMocks(this);
 
         mockRequestDto = new PostRequestDto(
-                "The Choosen",
+                "The Chosen",
                 "This is a content",
                 "Draft"
         );
@@ -94,7 +95,13 @@ class PostServiceTest {
 
     @Test
     void findAllPost() {
+        when(postRepository.findAll()).thenReturn(List.of(mockPost));
 
+        ResponseEntity<?> allPost = postService.findAllPost();
+
+        assertNotNull(allPost);
+        assertNotNull(allPost.getBody());
+        verify(postRepository, times(1)).findAll();
 
     }
 
@@ -110,7 +117,21 @@ class PostServiceTest {
     }
 
     @Test
+    void shouldThrowExceptionForDuplicateTitle(){
+        when(infoGetter.getLoggedInUser()).thenReturn(mockUser);
+        when(postRepository.findByTitleAndAuthorId("The Chosen",
+                mockUser.getId())).thenReturn(Optional.of(mockPost));
+
+        DuplicateEntityException duplicateEntityException = assertThrows(DuplicateEntityException.class,
+                () -> postService.create(mockRequestDto));
+        assertEquals("Change your post topic" , duplicateEntityException.getMessage());
+        verify(postRepository, times(1)).findByTitleAndAuthorId(mockRequestDto.title(), mockUser.getId());
+    }
+
+    @Test
     void deletePostById() {
+
+
     }
 
     @AfterEach

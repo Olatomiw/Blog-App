@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import thelazycoder.blog_app.dto.request.CommentRequest;
 import thelazycoder.blog_app.dto.request.PostRequestDto;
 import thelazycoder.blog_app.dto.request.UserDto;
+import thelazycoder.blog_app.dto.response.CommentResponse;
 import thelazycoder.blog_app.dto.response.PostResponse;
 import thelazycoder.blog_app.model.Comment;
 import thelazycoder.blog_app.model.Post;
@@ -51,6 +52,13 @@ public class  ModelMapper {
         comment.setText(commentRequest.text());
         comment.setCreatedAt(LocalDateTime.now());
         return comment;
+    }
+
+    public static CommentResponse mapCommentResponse(Comment comment){
+        CommentResponse commentResponse = new CommentResponse(
+                comment.getId(), comment.getAuthor().getId(), comment.getText(), comment.getPost().getId()
+        );
+        return commentResponse;
     }
 
 

@@ -17,6 +17,8 @@ import thelazycoder.blog_app.utils.GenericFieldValidator;
 import thelazycoder.blog_app.utils.InfoGetter;
 import thelazycoder.blog_app.utils.ResponseUtil;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class CommentService {
@@ -31,14 +33,23 @@ public class CommentService {
     public ResponseEntity<?> addComment(CommentRequest commentRequest, String postId) {
         User loggedInUser = infoGetter.getLoggedInUser();
 
-        Post post = postRepository.findById(postId).orElseThrow(
-                () -> new NoEntityFoundException("Post not found with id: " + postId));
-        Comment comment = ModelMapper.mapToComment(commentRequest);
-        comment.setAuthor(loggedInUser);
-        comment.setPost(post);
-        Comment validate = genericFieldValidator.validate(comment);
-        Comment save = commentRepository.save(validate);
-        return  new ResponseEntity<>(ResponseUtil.success(save, "Commented Successfully"), HttpStatus.OK);
+        try{
+            Post post = postRepository.findById(postId).orElseThrow(
+                    () -> new NoEntityFoundException("Post not found with id: " + postId));
+            Comment comment = ModelMapper.mapToComment(commentRequest);
+            comment.setId(UUID.randomUUID().toString());
+            comment.setAuthor(loggedInUser);
+            comment.setPost(post);
+            Comment validate = genericFieldValidator.validate(comment);
+            Comment save = commentRepository.save(validate);
+
+            return  new ResponseEntity<>(ResponseUtil.success(ModelMapper.mapCommentResponse(save), "Commented Successfully"), HttpStatus.OK);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            System.out.println("system error");
+        }
+        return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Transactional
@@ -47,9 +58,21 @@ public class CommentService {
     }
 
     @Transactional
-    public ResponseEntity<?> updateComment(CommentRequest commentRequest, String postId) {
+    public ResponseEntity<?> updateComment(CommentRequest commentRequest, String commentId) {
         User loggedInUser = infoGetter.getLoggedInUser();
+        Comment comment = commentRepository.findById(commentId).orElseThrow(
+                () -> new NoEntityFoundException("Comment not found with id: " + commentId));
+        validateCommentOwnership(comment, loggedInUser);
+        comment.setText(commentRequest.text());
         return null;
+    }
+
+
+
+    private void validateCommentOwnership(Comment comment, User user){
+        if(!comment.getAuthor().getId().equals(user.getId())){
+            throw new RuntimeException("Unauthorized to update comment");
+        }
     }
 
 }

@@ -41,6 +41,8 @@ public class User {
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime created;
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
+    private List<Comment> comments = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
