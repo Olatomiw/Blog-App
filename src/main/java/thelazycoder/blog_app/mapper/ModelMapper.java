@@ -56,7 +56,10 @@ public class  ModelMapper {
 
     public static CommentResponse mapCommentResponse(Comment comment){
         CommentResponse commentResponse = new CommentResponse(
-                comment.getId(), comment.getAuthor().getId(), comment.getText(), comment.getPost().getId()
+                comment.getId(),
+                comment.getAuthor().getId(),
+                comment.getText(),
+                comment.getPost().getId()
         );
         return commentResponse;
     }

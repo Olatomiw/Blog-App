@@ -52,11 +52,22 @@ public class CommentService {
         return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+//    Delete Comment
     @Transactional
-    public void deleteComment(String id){
-        commentRepository.deleteById(id);
+    public ResponseEntity<?> deleteComment(String postId, String commentId){
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(()->new NoEntityFoundException("Comment not found with id: " + commentId));
+
+        if (!comment.getPost().getId().equals(postId)){
+            throw new NoEntityFoundException("Comment does not belong to this post.");
+        }
+
+        commentRepository.deleteById(commentId);
+        return new ResponseEntity<>("Deleted", HttpStatus.OK);
     }
 
+//    Update Comment
     @Transactional
     public ResponseEntity<?> updateComment(CommentRequest commentRequest, String commentId) {
         User loggedInUser = infoGetter.getLoggedInUser();
@@ -66,7 +77,6 @@ public class CommentService {
         comment.setText(commentRequest.text());
         return null;
     }
-
 
 
     private void validateCommentOwnership(Comment comment, User user){
