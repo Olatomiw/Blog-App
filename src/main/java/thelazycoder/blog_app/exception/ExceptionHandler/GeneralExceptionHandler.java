@@ -27,7 +27,7 @@ public class GeneralExceptionHandler {
     public ResponseEntity<ApiResponse> handleDuplicateEntityException(DuplicateEntityException e) {
         ApiResponse<Object> apiResponse = new ApiResponse<>(
                 "Error",
-                "Duplicate Entity",
+                e.getMessage(),
                 null
         );
         return new ResponseEntity<>(apiResponse, HttpStatus.CONFLICT);

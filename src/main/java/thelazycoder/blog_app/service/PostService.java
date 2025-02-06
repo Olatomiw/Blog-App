@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import thelazycoder.blog_app.dto.request.PostRequestDto;
 import thelazycoder.blog_app.dto.response.PostResponse;
+import thelazycoder.blog_app.exception.DuplicateEntityException;
 import thelazycoder.blog_app.exception.NoEntityFoundException;
 import thelazycoder.blog_app.mapper.ModelMapper;
 import thelazycoder.blog_app.model.Post;
@@ -20,6 +21,7 @@ import thelazycoder.blog_app.utils.ResponseUtil;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -33,12 +35,12 @@ public class PostService {
     @Transactional
     public ResponseEntity<?> create(PostRequestDto postRequestDto){
         User loggedInUser = infoGetter.getLoggedInUser();
-        Post post = ModelMapper.mapToPost(postRequestDto);
-        post.setId(UUID.randomUUID().toString());
-        post.setAuthor(loggedInUser);
-        post.setCreatedAt(LocalDateTime.now());
-        post.setUpdatedAt(LocalDateTime.now());
+
+        Post post = createPost(postRequestDto, loggedInUser);
         Post validated = genericFieldValidator.validate(post);
+
+        checkDuplicateTitle(post.getTitle(), loggedInUser.getId());
+
         Post savePost = postRepository.save(validated);
         PostResponse postResponse = ModelMapper.mapToPostResponse(savePost);
             return new ResponseEntity<>(ResponseUtil.success(postResponse, "Successfully created"), HttpStatus.OK);
@@ -71,4 +73,22 @@ public class PostService {
         return new ResponseEntity<>(ResponseUtil.success(null, "Successfully deleted post"), HttpStatus.OK);
     }
 
+
+
+    public void checkDuplicateTitle(String title, String authorId){
+        System.out.println("Checking for duplicate title: " + title + " for author: " + authorId);
+        Optional<Post> byTitleAndAuthorId = postRepository.findByTitleAndAuthorId(title, authorId);
+        if (byTitleAndAuthorId.isPresent()){
+            System.out.println("Duplicate found!");
+            throw new DuplicateEntityException("Change your post topic");
+        }
+    }
+    public Post createPost(PostRequestDto postRequestDto, User loggedInUser){
+        Post post = ModelMapper.mapToPost(postRequestDto);
+        post.setId(UUID.randomUUID().toString());
+        post.setAuthor(loggedInUser);
+        post.setCreatedAt(LocalDateTime.now());
+        post.setUpdatedAt(LocalDateTime.now());
+        return post;
+    }
 }
