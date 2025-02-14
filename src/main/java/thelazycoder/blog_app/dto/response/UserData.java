@@ -1,7 +1,5 @@
 package thelazycoder.blog_app.dto.response;
 
-import thelazycoder.blog_app.model.User;
-
 import java.time.LocalDateTime;
 
 public record UserData(
@@ -12,7 +10,7 @@ public record UserData(
         String username,
         String profilePicture,
         LocalDateTime createdAt,
-        String role
+        thelazycoder.blog_app.model.Role role
 ) {
 
 }

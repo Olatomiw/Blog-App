@@ -7,17 +7,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import thelazycoder.blog_app.config.CloudinaryService;
 import thelazycoder.blog_app.dto.request.UserDto;
 import thelazycoder.blog_app.dto.response.ApiResponse;
 import thelazycoder.blog_app.dto.response.UserData;
 import thelazycoder.blog_app.exception.InvalidInputException;
 import thelazycoder.blog_app.mapper.ModelMapper;
+import thelazycoder.blog_app.model.Role;
 import thelazycoder.blog_app.model.User;
 import thelazycoder.blog_app.repository.UserRepository;
 import thelazycoder.blog_app.utils.GenericFieldValidator;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+
+import static thelazycoder.blog_app.mapper.ModelMapper.*;
 
 @Service
 @RequiredArgsConstructor
@@ -27,16 +32,16 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final GenericFieldValidator genericFieldValidator;
-
+    private final CloudinaryService cloudinaryService;
 
     @Transactional
-    public ResponseEntity<?> signUp(UserDto userDto){
-        ModelMapper modelMapper = new ModelMapper();
-        User user = modelMapper.mapDtoToModel(userDto);
+    public ResponseEntity<?> signUp(final UserDto userDto, MultipartFile multipartFile){
+        User user = mapDtoToModel(userDto);
         try {
+            var result = cloudinaryService.uploadFile(multipartFile);
             user.setId(UUID.randomUUID().toString());
-            user.setImage("my_image.png");
-            user.setRole("ROLE_USER");
+            user.setImage((String) result.get("secure_url"));
+            user.setRole(Role.ADMIN);
             user.setCreated(LocalDateTime.now());
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             User validate = genericFieldValidator.validate(user);

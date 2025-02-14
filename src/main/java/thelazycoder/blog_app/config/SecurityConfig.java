@@ -31,11 +31,11 @@ public class SecurityConfig {
         DefaultSecurityFilterChain filterChain =  http
                 .csrf(e->e.disable())
                 .cors(AbstractHttpConfigurer::disable)
-                .formLogin(Customizer.withDefaults())
+//                .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(e->e
                         .requestMatchers("/","/swagger-ui/**", "/v3/api-docs*/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/signup").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
