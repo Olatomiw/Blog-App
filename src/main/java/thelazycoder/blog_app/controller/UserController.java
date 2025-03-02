@@ -1,6 +1,6 @@
 package thelazycoder.blog_app.controller;
 
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -12,12 +12,11 @@ import thelazycoder.blog_app.config.CloudinaryService;
 import thelazycoder.blog_app.dto.request.UserDto;
 import thelazycoder.blog_app.exception.InvalidInputException;
 import thelazycoder.blog_app.service.UserService;
-
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Map;
+
 
 @Tag(name = "USER", description = "Endpoints for managing users")
 @RestController
@@ -37,7 +36,9 @@ public class UserController {
         return "Welcome";
     }
     @PostMapping(value = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?>    signUpUser(@Valid @RequestPart("data") UserDto userDto, @RequestPart("image") MultipartFile multipartFile) throws IOException {
+    public ResponseEntity<?>signUpUser(@Valid @RequestPart(value ="data") @JsonAlias("Data") UserDto userDto,
+                                       @RequestPart("image") MultipartFile multipartFile) throws IOException {
+        System.out.println(userDto);
         BufferedImage bufferedImage = ImageIO.read(multipartFile.getInputStream());
         if (bufferedImage == null) {
             return new ResponseEntity<>("Invalid image", HttpStatus.BAD_REQUEST);
@@ -58,7 +59,6 @@ public class UserController {
            System.out.println("MultipartFile: " + file);
            System.out.println("Filename: " + file.getOriginalFilename());
            System.out.println("Size: " + file.getSize());
-
            Map map = cloudinaryService.uploadFile(file);
            String url = map.get("url").toString();
            return new ResponseEntity<>(url, HttpStatus.CREATED);

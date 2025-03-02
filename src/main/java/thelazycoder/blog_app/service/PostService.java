@@ -3,6 +3,7 @@ package thelazycoder.blog_app.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,7 +20,6 @@ import thelazycoder.blog_app.utils.InfoGetter;
 import thelazycoder.blog_app.utils.ResponseUtil;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,6 +31,9 @@ public class PostService {
     private final PostRepository postRepository;
     private final InfoGetter infoGetter;
     private final GenericFieldValidator genericFieldValidator;
+    private final SimpMessagingTemplate simpMessagingTemplate;
+
+
 
     @Transactional
     public ResponseEntity<?> create(PostRequestDto postRequestDto){
@@ -55,6 +58,7 @@ public class PostService {
         List<PostResponse> postResponseList = all.stream().map(
                 ModelMapper::mapToPostResponse
         ).toList();
+        simpMessagingTemplate.convertAndSend("/topic/posts", postResponseList);
             return new ResponseEntity<>(ResponseUtil.success(postResponseList, "Successfully found all the posts"), HttpStatus.OK);
     }
 

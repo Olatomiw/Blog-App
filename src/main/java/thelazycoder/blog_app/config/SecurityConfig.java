@@ -1,5 +1,6 @@
 package thelazycoder.blog_app.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -22,6 +23,9 @@ import thelazycoder.blog_app.repository.UserRepository;
 public class SecurityConfig {
     private final UserRepository userRepository;
 
+    @Value("${security.remember-me.key}")
+    private String rememberMeKey;
+
     public SecurityConfig(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
@@ -29,15 +33,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         DefaultSecurityFilterChain filterChain =  http
-                .csrf(e->e.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
-//                .formLogin(Customizer.withDefaults())
+                .formLogin(login -> login
+                        .loginProcessingUrl("/api/auth/login").permitAll()
+                        )
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(e->e
                         .requestMatchers("/","/swagger-ui/**", "/v3/api-docs*/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/post/getAllPost").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
+                        .requestMatchers("/topic/**", "/ws/**", "/app/**").permitAll()
                         .anyRequest().authenticated()
                 )
+//                .rememberMe(remember -> remember
+//                        .key(rememberMeKey)
+//                        .tokenValiditySeconds(604800))
                 .authenticationProvider(authenticationProvider())
                 .build();
         return filterChain;
