@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 import thelazycoder.blog_app.dto.request.PostRequestDto;
+import thelazycoder.blog_app.dto.response.AuthorDTO;
 import thelazycoder.blog_app.dto.response.PostResponse;
 import thelazycoder.blog_app.exception.DuplicateEntityException;
 import thelazycoder.blog_app.model.Post;
@@ -77,7 +78,12 @@ class PostServiceTest {
                 mockPost.getId(),
                 mockPost.getTitle(),
                 mockPost.getContent(),
-                mockPost.getStatus()
+                mockPost.getStatus(),
+                mockPost.getCreatedAt(),
+                mockPost.getUpdatedAt(),
+                new AuthorDTO(
+                        mockPost.getAuthor().getId(), mockPost.getAuthor().getUsername()
+                ),null,null
         );
     }
     @Test
