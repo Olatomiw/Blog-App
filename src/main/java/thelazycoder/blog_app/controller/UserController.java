@@ -6,9 +6,15 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import thelazycoder.blog_app.config.CloudinaryService;
+import thelazycoder.blog_app.config.JWT.JwtService;
+import thelazycoder.blog_app.dto.request.AuthDto;
 import thelazycoder.blog_app.dto.request.UserDto;
 import thelazycoder.blog_app.exception.InvalidInputException;
 import thelazycoder.blog_app.service.UserService;
@@ -24,11 +30,16 @@ import java.util.Map;
 public class UserController {
     private final UserService userService;
     private final CloudinaryService cloudinaryService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
 
-    public UserController(UserService userService, CloudinaryService cloudinaryService) throws InvalidInputException {
+    public UserController(UserService userService, CloudinaryService cloudinaryService,
+                          AuthenticationManager authenticationManager, JwtService jwtService) throws InvalidInputException {
         this.userService = userService;
         this.cloudinaryService = cloudinaryService;
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
     }
 
     @GetMapping("/")
@@ -65,5 +76,19 @@ public class UserController {
        }catch (IOException e){
            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload file: " + e.getMessage());
        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> loginController(@RequestBody AuthDto authDto){
+        Authentication authentication= authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                authDto.username(), authDto.password()
+        ));
+        if (authentication.isAuthenticated()){
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+        String token = jwtService.createToken(authentication);
+        return new ResponseEntity<>(token, HttpStatus.OK);
+
     }
 }
