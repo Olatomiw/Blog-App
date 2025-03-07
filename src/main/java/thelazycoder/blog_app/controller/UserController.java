@@ -82,7 +82,7 @@ public class UserController {
     public ResponseEntity<?> loginController(@RequestBody AuthDto authDto){
         Authentication authentication= authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                authDto.username(), authDto.password()
+                authDto.email(), authDto.password()
         ));
         if (authentication.isAuthenticated()){
             SecurityContextHolder.getContext().setAuthentication(authentication);
