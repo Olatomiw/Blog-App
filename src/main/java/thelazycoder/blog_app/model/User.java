@@ -2,7 +2,6 @@ package thelazycoder.blog_app.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,8 +30,9 @@ public class User {
     @Column(nullable = false)
     @Size(min = 8, max = 100, message = "min 8, max 100")
     private String password;
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String role;
+    private Role role;
     private String image;
     @OneToMany(mappedBy = "author",
             orphanRemoval = true,

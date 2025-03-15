@@ -1,8 +1,9 @@
 package thelazycoder.blog_app.dto.response;
 
-import thelazycoder.blog_app.model.User;
+import thelazycoder.blog_app.model.Role;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record UserData(
         String id,
@@ -12,7 +13,8 @@ public record UserData(
         String username,
         String profilePicture,
         LocalDateTime createdAt,
-        String role
+        Role role,
+        List<PostResponse> postResponseList
 ) {
 
 }

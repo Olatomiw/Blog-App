@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.servers.Server;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -35,6 +36,17 @@ public class SwaggerConfig {
                 .servers(List.of(
                         new Server().url("http://localhost:8080").description("Development Server")
                 ));
+    }
+
+    @Bean
+    public OpenApiCustomizer customizeSwagger() {
+        return openApi -> openApi.getPaths().forEach((path, pathItem) -> {
+            if (path.startsWith("/api/signup")) {  // Exempt public endpoints from security
+                pathItem.readOperations().forEach(operation -> {
+                    operation.setSecurity(null);
+                });
+            }
+        });
     }
 
 }

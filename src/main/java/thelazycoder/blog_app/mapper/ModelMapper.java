@@ -2,16 +2,18 @@ package thelazycoder.blog_app.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import thelazycoder.blog_app.dto.request.CommentRequest;
 import thelazycoder.blog_app.dto.request.PostRequestDto;
 import thelazycoder.blog_app.dto.request.UserDto;
-import thelazycoder.blog_app.dto.response.CommentResponse;
-import thelazycoder.blog_app.dto.response.PostResponse;
+import thelazycoder.blog_app.dto.response.*;
 import thelazycoder.blog_app.model.Comment;
 import thelazycoder.blog_app.model.Post;
 import thelazycoder.blog_app.model.User;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class  ModelMapper {
@@ -38,13 +40,26 @@ public class  ModelMapper {
     }
 
     public static PostResponse mapToPostResponse(Post post) {
-        PostResponse postResponse = new PostResponse(
+        return new PostResponse(
                 post.getId(),
                 post.getTitle(),
                 post.getContent(),
-                post.getStatus()
+                post.getStatus(),
+                post.getCreatedAt(),
+                post.getUpdatedAt(),
+                new AuthorDTO(post.getAuthor().getId(), post.getAuthor().getUsername()),
+                post.getCategories().stream().map(
+                        category -> new CategoryDTO(category.getId(), category.getName())
+                ).toList(),
+                post.getComments().stream().map(
+                        comment -> new CommentResponseDTO(
+                                comment.getId(),
+                                comment.getText(),
+                                comment.getCreatedAt(),
+                                new AuthorDTO(comment.getAuthor().getId(), comment.getAuthor().getUsername())
+                        )
+                ).toList()
         );
-        return postResponse;
     }
 
     public static Comment mapToComment(CommentRequest commentRequest) {
@@ -55,13 +70,25 @@ public class  ModelMapper {
     }
 
     public static CommentResponse mapCommentResponse(Comment comment){
-        CommentResponse commentResponse = new CommentResponse(
+        return new CommentResponse(
                 comment.getId(),
                 comment.getAuthor().getId(),
                 comment.getText(),
                 comment.getPost().getId()
         );
-        return commentResponse;
+    }
+
+    public static UserData mapToUserData(User user){
+        return new UserData(
+                user.getId(), user.getFirstName(),
+                user.getLastName(), user.getEmail(),
+                user.getUsername(), user.getImage(),
+                user.getCreated(),
+                user.getRole(),
+                user.getPosts().stream().map(
+                        post -> mapToPostResponse(post)
+                        ).collect(Collectors.toList())
+        );
     }
 
 
