@@ -16,8 +16,13 @@ import thelazycoder.blog_app.config.CloudinaryService;
 import thelazycoder.blog_app.config.JWT.JwtService;
 import thelazycoder.blog_app.dto.request.AuthDto;
 import thelazycoder.blog_app.dto.request.UserDto;
+import thelazycoder.blog_app.dto.response.AuthResponse;
+import thelazycoder.blog_app.dto.response.UserData;
 import thelazycoder.blog_app.exception.InvalidInputException;
+import thelazycoder.blog_app.model.User;
 import thelazycoder.blog_app.service.UserService;
+import thelazycoder.blog_app.utils.ResponseUtil;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -80,15 +85,6 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> loginController(@RequestBody AuthDto authDto){
-        Authentication authentication= authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                authDto.email(), authDto.password()
-        ));
-        if (authentication.isAuthenticated()){
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
-        String token = jwtService.createToken(authentication);
-        return new ResponseEntity<>(token, HttpStatus.OK);
-
+       return userService.login(authDto);
     }
 }

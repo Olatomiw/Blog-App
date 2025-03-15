@@ -1,6 +1,7 @@
 package thelazycoder.blog_app.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -51,7 +52,7 @@ public class PostService {
 
     @Transactional
     public ResponseEntity<?> findAllPost(){
-        List<Post> all = postRepository.findAll();
+        List<Post> all = postRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
         if (all.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No posts found");
         }

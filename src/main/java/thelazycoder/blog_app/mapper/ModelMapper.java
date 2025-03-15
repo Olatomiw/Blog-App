@@ -2,6 +2,7 @@ package thelazycoder.blog_app.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import thelazycoder.blog_app.dto.request.CommentRequest;
 import thelazycoder.blog_app.dto.request.PostRequestDto;
 import thelazycoder.blog_app.dto.request.UserDto;
@@ -11,6 +12,8 @@ import thelazycoder.blog_app.model.Post;
 import thelazycoder.blog_app.model.User;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class  ModelMapper {
@@ -72,6 +75,19 @@ public class  ModelMapper {
                 comment.getAuthor().getId(),
                 comment.getText(),
                 comment.getPost().getId()
+        );
+    }
+
+    public static UserData mapToUserData(User user){
+        return new UserData(
+                user.getId(), user.getFirstName(),
+                user.getLastName(), user.getEmail(),
+                user.getUsername(), user.getImage(),
+                user.getCreated(),
+                user.getRole(),
+                user.getPosts().stream().map(
+                        post -> mapToPostResponse(post)
+                        ).collect(Collectors.toList())
         );
     }
 

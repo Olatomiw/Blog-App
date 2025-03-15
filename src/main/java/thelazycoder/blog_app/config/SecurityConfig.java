@@ -39,7 +39,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         DefaultSecurityFilterChain filterChain =  http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
+                .formLogin(login -> login
+                        .loginProcessingUrl("api/auth/login").permitAll())
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(e->e
                         .requestMatchers("/","/swagger-ui/**", "/v3/api-docs*/**").permitAll()

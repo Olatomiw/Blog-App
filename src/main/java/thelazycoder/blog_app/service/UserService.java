@@ -4,13 +4,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import thelazycoder.blog_app.config.CloudinaryService;
+import thelazycoder.blog_app.config.JWT.JwtService;
+import thelazycoder.blog_app.dto.request.AuthDto;
 import thelazycoder.blog_app.dto.request.UserDto;
 import thelazycoder.blog_app.dto.response.ApiResponse;
+import thelazycoder.blog_app.dto.response.AuthResponse;
 import thelazycoder.blog_app.dto.response.UserData;
 import thelazycoder.blog_app.exception.InvalidInputException;
 import thelazycoder.blog_app.mapper.ModelMapper;
@@ -18,6 +26,7 @@ import thelazycoder.blog_app.model.Role;
 import thelazycoder.blog_app.model.User;
 import thelazycoder.blog_app.repository.UserRepository;
 import thelazycoder.blog_app.utils.GenericFieldValidator;
+import thelazycoder.blog_app.utils.ResponseUtil;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -33,6 +42,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final GenericFieldValidator genericFieldValidator;
     private final CloudinaryService cloudinaryService;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
 
     @Transactional
     public ResponseEntity<?> signUp(final UserDto userDto, MultipartFile multipartFile){
@@ -47,18 +58,14 @@ public class UserService {
             User validate = genericFieldValidator.validate(user);
             User save = userRepository.save(validate);
 
-            UserData userData = new UserData(
-                    save.getId(), save.getFirstName(),
-                    save.getLastName(), save.getEmail(),
-                    save.getUsername(), save.getImage(),
-                    save.getCreated(), save.getRole()
-            );
+            UserData userData = mapToUserData(save);
             ApiResponse<UserData> apiResponse = new ApiResponse<>(
                     "Successfully Registered",
                     "User Registered",
                     userData
             );
-            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+            AuthDto authDto = new AuthDto(userDto.email(), userDto.password());
+            return new ResponseEntity<>(login(authDto), HttpStatus.OK);
         }catch (InvalidInputException e){
             throw e;
         }
@@ -68,5 +75,27 @@ public class UserService {
                     .body("An unexpected error occurred. Please try again later.");
 
         }
+    }
+
+    @Transactional
+    @jakarta.transaction.Transactional
+    public ResponseEntity<?> login(AuthDto authDto){
+        Authentication authentication= authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        authDto.email() , authDto.password()
+                ));
+        UserData userData = null;
+        if (authentication.isAuthenticated()){
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            User user =userRepository.findByEmail(authentication.getName())
+                    .orElseThrow(() -> new UsernameNotFoundException("unavailable"));
+            userData = mapToUserData(user);
+        }
+        String token = jwtService.createToken(authentication);
+
+        AuthResponse authResponse = new AuthResponse(
+                token, userData
+        );
+        return new ResponseEntity<>(ResponseUtil.success(authResponse, "logged success"), HttpStatus.OK);
     }
 }
