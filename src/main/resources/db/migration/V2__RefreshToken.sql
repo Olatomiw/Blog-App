@@ -4,4 +4,7 @@ CREATE TABLE refresh_token(
     expiry_date  TIMESTAMP NOT NULL ,
     user_id VARCHAR NOT NULL ,
     FOREIGN KEY (user_id) REFERENCES users(id)
-)
+);
+
+ALTER TABLE categories
+DROP COLUMN description
