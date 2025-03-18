@@ -1,9 +1,6 @@
 package thelazycoder.blog_app.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.util.HashSet;
@@ -16,9 +13,10 @@ import java.util.Set;
 public class Category {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+    @Column(nullable = false, unique = true)
     private String name;
-    private String description;
     @ManyToMany(mappedBy = "categories")
     private Set<Post> posts = new HashSet<Post>();
 

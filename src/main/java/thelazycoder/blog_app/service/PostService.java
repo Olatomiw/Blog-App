@@ -13,23 +13,24 @@ import thelazycoder.blog_app.dto.response.PostResponse;
 import thelazycoder.blog_app.exception.DuplicateEntityException;
 import thelazycoder.blog_app.exception.NoEntityFoundException;
 import thelazycoder.blog_app.mapper.ModelMapper;
+import thelazycoder.blog_app.model.Category;
 import thelazycoder.blog_app.model.Post;
 import thelazycoder.blog_app.model.User;
+import thelazycoder.blog_app.repository.CategoryRepository;
 import thelazycoder.blog_app.repository.PostRepository;
 import thelazycoder.blog_app.utils.GenericFieldValidator;
 import thelazycoder.blog_app.utils.InfoGetter;
 import thelazycoder.blog_app.utils.ResponseUtil;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
+    private final CategoryRepository categoryRepository;
     private final InfoGetter infoGetter;
     private final GenericFieldValidator genericFieldValidator;
     private final SimpMessagingTemplate simpMessagingTemplate;
@@ -42,8 +43,9 @@ public class PostService {
 
         Post post = createPost(postRequestDto, loggedInUser);
         Post validated = genericFieldValidator.validate(post);
-
+        Set<Category> categories =new HashSet<>(categoryRepository.findAllById(postRequestDto.categoryIds()));
         checkDuplicateTitle(post.getTitle(), loggedInUser.getId());
+        post.setCategories(categories);
 
         Post savePost = postRepository.save(validated);
         PostResponse postResponse = ModelMapper.mapToPostResponse(savePost);

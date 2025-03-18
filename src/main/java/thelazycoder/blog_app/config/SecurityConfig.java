@@ -45,6 +45,8 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(e->e
                         .requestMatchers("/","/swagger-ui/**", "/v3/api-docs*/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/api/category/categories").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/post/getAllPost").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
                         .requestMatchers("/topic/**", "/ws/**", "/app/**").permitAll()

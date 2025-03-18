@@ -52,7 +52,7 @@ public class UserController {
         return "Welcome";
     }
     @PostMapping(value = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?>signUpUser(@Valid @RequestPart(value ="data") @JsonAlias("Data") UserDto userDto,
+    public ResponseEntity<?>signUpUser(@Valid @RequestPart(value ="SignupCredentials") @JsonAlias("SignupCredentials") UserDto userDto,
                                        @RequestPart("image") MultipartFile multipartFile) throws IOException {
         System.out.println(userDto);
         BufferedImage bufferedImage = ImageIO.read(multipartFile.getInputStream());
