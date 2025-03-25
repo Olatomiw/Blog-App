@@ -1,10 +1,11 @@
 package thelazycoder.blog_app.service;
 
+
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -33,7 +34,8 @@ public class PostService {
     private final CategoryRepository categoryRepository;
     private final InfoGetter infoGetter;
     private final GenericFieldValidator genericFieldValidator;
-    private final SimpMessagingTemplate simpMessagingTemplate;
+    @Lazy
+    private final WebSocketService webSocketService;
 
 
 
@@ -61,7 +63,7 @@ public class PostService {
         List<PostResponse> postResponseList = all.stream().map(
                 ModelMapper::mapToPostResponse
         ).toList();
-        simpMessagingTemplate.convertAndSend("/topic/posts", postResponseList);
+        webSocketService.sendPostUpdate(postResponseList);
             return new ResponseEntity<>(ResponseUtil.success(postResponseList, "Successfully found all the posts"), HttpStatus.OK);
     }
 
