@@ -87,4 +87,9 @@ public class UserController {
     public ResponseEntity<?> loginController(@RequestBody AuthDto authDto){
        return userService.login(authDto);
     }
+
+    @GetMapping("/getUserPosts")
+    public ResponseEntity<?> getAllUserPost(){
+      return userService.getLoggedInUserPosts();
+    };
 }

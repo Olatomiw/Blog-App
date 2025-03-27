@@ -19,6 +19,7 @@ import thelazycoder.blog_app.dto.request.AuthDto;
 import thelazycoder.blog_app.dto.request.UserDto;
 import thelazycoder.blog_app.dto.response.ApiResponse;
 import thelazycoder.blog_app.dto.response.AuthResponse;
+import thelazycoder.blog_app.dto.response.PostResponse;
 import thelazycoder.blog_app.dto.response.UserData;
 import thelazycoder.blog_app.exception.InvalidInputException;
 import thelazycoder.blog_app.mapper.ModelMapper;
@@ -26,10 +27,13 @@ import thelazycoder.blog_app.model.Role;
 import thelazycoder.blog_app.model.User;
 import thelazycoder.blog_app.repository.UserRepository;
 import thelazycoder.blog_app.utils.GenericFieldValidator;
+import thelazycoder.blog_app.utils.InfoGetter;
 import thelazycoder.blog_app.utils.ResponseUtil;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static thelazycoder.blog_app.mapper.ModelMapper.*;
 
@@ -44,6 +48,9 @@ public class UserService {
     private final CloudinaryService cloudinaryService;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final InfoGetter infoGetter;
+    private final WebSocketService webSocketService;
+    private final EmailService emailService;
 
     @Transactional
     public ResponseEntity<?> signUp(final UserDto userDto, MultipartFile multipartFile){
@@ -65,6 +72,9 @@ public class UserService {
                     userData
             );
             AuthDto authDto = new AuthDto(userDto.email(), userDto.password());
+            emailService.sendEmail(user.getEmail(),
+                    "SIGN UP SUCCESSFUL",
+                    "You have successfully SignedUp to BLOGAI");
             return new ResponseEntity<>(login(authDto), HttpStatus.OK);
         }catch (InvalidInputException e){
             throw e;
@@ -96,6 +106,16 @@ public class UserService {
         AuthResponse authResponse = new AuthResponse(
                 token, userData
         );
+        webSocketService.updateUserPost(authResponse);
         return new ResponseEntity<>(ResponseUtil.success(authResponse, "logged success"), HttpStatus.OK);
+    }
+
+    @Transactional
+    public ResponseEntity<?> getLoggedInUserPosts(){
+        User loggedInUser = infoGetter.getLoggedInUser();
+        List<PostResponse> collect = loggedInUser.getPosts().stream().map(
+                post -> mapToPostResponse(post)
+        ).collect(Collectors.toList());
+        return new ResponseEntity<>(collect, HttpStatus.OK);
     }
 }
