@@ -20,8 +20,8 @@ import java.util.function.Function;
 @Component
 public class JwtService {
 
-    @Value("${jwt.secret.key}")
-    private String secretKey;
+
+    private final String secretKey= System.getenv("SECRET_KEY");
     @Value("${jwt.expiry.time}")
     private int expirationInSeconds;
 

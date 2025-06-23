@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,19 +18,13 @@ import java.util.Objects;
 
 @Service
 public class CloudinaryService {
-
-    @Value("${cloud_api_key}")
-    private String cloud_api_key;
-    @Value("${cloud_secret_key}")
-    private String cloud_secret_key;
-
     final Cloudinary cloudinary;
     private final Map<String, Object> valuesMap = new HashMap<>();
 
-    public CloudinaryService() {
+    public CloudinaryService(Environment environment) {
         valuesMap.put("cloud_name", "dhtpu4w04");
-        valuesMap.put("api_key", "186478295363518");
-        valuesMap.put("api_secret", "UYQP32IanJQkJjN8PcykLWtRBHw");
+        valuesMap.put("api_key", environment.getProperty("cloud_api_key"));
+        valuesMap.put("api_secret", environment.getProperty("cloud_secret_key"));
         valuesMap.put("secure", true);
         cloudinary = new Cloudinary(valuesMap);
     }
