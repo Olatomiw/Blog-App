@@ -4,6 +4,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
+import java.sql.PreparedStatement;
+
 @Component
 public class EmailService{
 
@@ -20,5 +22,4 @@ public class EmailService{
         message.setText(body);
         mailSender.send(message);
     }
-
 }

@@ -27,8 +27,7 @@ public class SecurityConfig {
     private final UserRepository userRepository;
     private final JwtFilterChain jwtFilterChain;
 
-    @Value("${security.remember-me.key}")
-    private String rememberMeKey;
+    private final String rememberMeKey = System.getenv("REMEMBER_KEY");
 
     public SecurityConfig(UserRepository userRepository, JwtFilterChain jwtFilterChain) {
         this.userRepository = userRepository;
@@ -44,7 +43,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("api/auth/login").permitAll())
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(e->e
-                        .requestMatchers("/","/swagger-ui/**", "/v3/api-docs*/**").permitAll()
+                            .requestMatchers("/","/swagger-ui/**", "/v3/api-docs*/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/category/categories").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/post/getAllPost").permitAll()
