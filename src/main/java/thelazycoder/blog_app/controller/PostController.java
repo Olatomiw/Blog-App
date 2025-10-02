@@ -40,7 +40,7 @@ public class PostController {
             }
     )
     @PostMapping("/create")
-    public ResponseEntity<?> post(@Valid @RequestBody PostRequestDto postRequestDto) {
+    public ResponseEntity<?> post(@Valid @ModelAttribute PostRequestDto postRequestDto) {
         return postService.create(postRequestDto);
     }
 

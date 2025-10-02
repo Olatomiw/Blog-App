@@ -1,6 +1,7 @@
 package thelazycoder.blog_app.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,4 +48,7 @@ public class Post {
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+    @NotBlank
+    @Column(name = "imageurl")
+    private String imageUrl;
 }

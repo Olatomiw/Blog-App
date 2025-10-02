@@ -1,9 +1,14 @@
 package thelazycoder.blog_app.dto.request;
 
 import jakarta.validation.constraints.NotNull;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-public record PostRequestDto(@NotNull String title, @NotNull String content, @NotNull String status, List<String>categoryIds) {
+public record PostRequestDto(@NotNull String title,
+                             @NotNull String content,
+                             @NotNull String status,
+                             @NotNull MultipartFile image,
+                             List<String>categoryIds) {
 }
