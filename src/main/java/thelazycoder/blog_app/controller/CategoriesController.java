@@ -4,9 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import thelazycoder.blog_app.dto.request.CategoryDto;
+import thelazycoder.blog_app.dto.response.CategoryDTO;
 import thelazycoder.blog_app.exception.DuplicateEntityException;
 import thelazycoder.blog_app.repository.CategoryRepository;
 import thelazycoder.blog_app.service.CategoryService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/category")
@@ -16,8 +19,9 @@ public class CategoriesController {
     private final CategoryService categoryService;
 
     @GetMapping("/categories")
-    public ResponseEntity<?> getAllCategories() {
-        return categoryService.findAll();
+    public ResponseEntity<List<CategoryDTO>> getAllCategories() {
+        List<CategoryDTO> all = categoryService.findAll();
+        return ResponseEntity.ok(all);
     }
 
     @PostMapping("/create")

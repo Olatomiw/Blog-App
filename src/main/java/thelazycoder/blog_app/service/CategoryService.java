@@ -19,12 +19,12 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
 
     @Transactional
-    public ResponseEntity<?> findAll() {
+    public List<CategoryDTO> findAll() {
         List<Category> all = categoryRepository.findAll();
-        List<CategoryDTO> list = all.stream().map(
+        List<CategoryDTO> allCategories = all.stream().map(
                 category -> new CategoryDTO(category.getId(), category.getName())
         ).toList();
-        return ResponseEntity.ok(list);
+        return allCategories;
     }
 
     public ResponseEntity<?> create(String name) {

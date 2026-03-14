@@ -28,10 +28,15 @@ public class ChatClientController {
     public SummarizeResponse generateText(@PathVariable String postId){
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new NoEntityFoundException("Not found"));
-        String content = post.getContent();
-        PromptTemplate promptTemplate= new PromptTemplate("Summarize the content following text,{content}");
-        Prompt prompt = promptTemplate.create(Map.of("content", content));
-        return chatClient.prompt(prompt)
+        return chatClient.prompt()
+                // Injecting DB metadata (Title and Tags) so the AI is "aware" of the database record
+                .user(u -> u.text("""
+                        Please summarize the following post:
+                        Title: {title}
+                        Content: {content}
+                        """)
+                        .param("title", post.getTitle())
+                        .param("content", post.getContent()))
                 .call()
                 .entity(SummarizeResponse.class);
     }

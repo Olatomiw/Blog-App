@@ -1,5 +1,7 @@
 package thelazycoder.blog_app.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,4 +14,5 @@ public interface PostRepository extends JpaRepository<Post, String> {
 
     @Query("SELECT p FROM Post p WHERE p.title =:title AND p.author.id = :authorId")
     Optional<Post> findByTitleAndAuthorId(String title, String authorId);
+    Page<Post> findAll(Pageable pageable);
 }

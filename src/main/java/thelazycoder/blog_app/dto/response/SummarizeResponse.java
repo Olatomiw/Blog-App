@@ -1,4 +1,5 @@
 package thelazycoder.blog_app.dto.response;
 
-public record SummarizeResponse (String content){
+public record SummarizeResponse (String title,
+                                 String content){
 }
