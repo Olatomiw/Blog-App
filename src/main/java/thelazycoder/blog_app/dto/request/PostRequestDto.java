@@ -9,6 +9,5 @@ import java.util.List;
 public record PostRequestDto(@NotNull String title,
                              @NotNull String content,
                              @NotNull String status,
-                             @NotNull MultipartFile image,
                              List<String>categoryIds) {
 }

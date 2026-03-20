@@ -22,7 +22,7 @@ public class JwtService {
 
 
     private final String secretKey= System.getenv("SECRET_KEY");
-    @Value("${jwt.expiry.time}")
+    @Value("${jwt.expiration}")
     private int expirationInSeconds;
 
 

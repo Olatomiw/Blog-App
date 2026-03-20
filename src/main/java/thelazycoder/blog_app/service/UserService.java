@@ -59,7 +59,7 @@ public class UserService {
         try {
             var result = cloudinaryService.uploadFile(multipartFile);
             user.setId(UUID.randomUUID().toString());
-            user.setImage((String) result.get("secure_url"));
+            user.setImage((String) result.get().get("secure_url"));
             user.setRole(Role.ADMIN);
             user.setCreated(LocalDateTime.now());
             user.setPassword(passwordEncoder.encode(user.getPassword()));

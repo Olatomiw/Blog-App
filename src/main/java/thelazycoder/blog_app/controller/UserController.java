@@ -19,6 +19,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 
 @Tag(name = "USER", description = "Endpoints for managing users")
@@ -46,7 +48,7 @@ public class UserController {
     @PostMapping(value = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?>signUpUser(@Valid @RequestPart(value ="SignupCredentials") @JsonAlias("SignupCredentials") UserDto userDto,
                                        @RequestPart("image") MultipartFile multipartFile) throws IOException {
-        System.out.println(userDto);
+//        System.out.println(userDto);
         BufferedImage bufferedImage = ImageIO.read(multipartFile.getInputStream());
         if (bufferedImage == null) {
             return new ResponseEntity<>("Invalid image", HttpStatus.BAD_REQUEST);
@@ -67,11 +69,15 @@ public class UserController {
            System.out.println("MultipartFile: " + file);
            System.out.println("Filename: " + file.getOriginalFilename());
            System.out.println("Size: " + file.getSize());
-           Map map = cloudinaryService.uploadFile(file);
-           String url = map.get("url").toString();
-           return new ResponseEntity<>(url, HttpStatus.CREATED);
+           CompletableFuture<Map> mapCompletableFuture = cloudinaryService.uploadFile(file);
+           String secureUrl = mapCompletableFuture.get().get("secure_url").toString();
+           return new ResponseEntity<>(secureUrl, HttpStatus.CREATED);
        }catch (IOException e){
            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload file: " + e.getMessage());
+       } catch (ExecutionException e) {
+           throw new RuntimeException(e);
+       } catch (InterruptedException e) {
+           throw new RuntimeException(e);
        }
     }
 

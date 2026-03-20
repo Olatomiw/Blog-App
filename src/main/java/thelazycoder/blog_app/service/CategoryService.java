@@ -2,6 +2,7 @@ package thelazycoder.blog_app.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import thelazycoder.blog_app.dto.request.CategoryDto;
@@ -18,6 +19,7 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
+    @Cacheable(value = "allCategories")
     @Transactional
     public List<CategoryDTO> findAll() {
         List<Category> all = categoryRepository.findAll();

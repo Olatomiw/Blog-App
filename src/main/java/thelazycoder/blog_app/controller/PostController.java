@@ -1,5 +1,6 @@
 package thelazycoder.blog_app.controller;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -7,12 +8,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import thelazycoder.blog_app.dto.request.PostRequestDto;
 import thelazycoder.blog_app.dto.response.PostResponse;
 import thelazycoder.blog_app.service.PostService;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 @Tag(name = "POST API", description = "Endpoints for managing posts")
 @RestController
@@ -40,8 +48,22 @@ public class PostController {
             }
     )
     @PostMapping("/create")
-    public ResponseEntity<?> post(@Valid @ModelAttribute PostRequestDto postRequestDto) {
-        return postService.create(postRequestDto);
+    public ResponseEntity<PostResponse> post(@Valid @RequestPart(value = "PostBody")
+                                                 @JsonAlias("PostBody") PostRequestDto postRequestDto,
+                                  @RequestPart(value = "image") MultipartFile file) throws IOException {
+        BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
+        if (bufferedImage == null) {
+            throw new IOException("Invalid image file");
+        }
+        PostResponse postResponse = null;
+        try {
+            postResponse = postService.create(postRequestDto, file);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return ResponseEntity.ok(postResponse);
     }
 
     @Operation(
@@ -61,9 +83,11 @@ public class PostController {
     public ResponseEntity<?> getPosts() {
         return postService.findAllPost();
     }
+
     @GetMapping("/getPost/{id}")
-    public ResponseEntity<?> getPost(@PathVariable String id) {
-        return postService.getPostById(id);
+    public ResponseEntity<PostResponse> getPost(@PathVariable String id) {
+        PostResponse postById = postService.getPostById(id);
+        return ResponseEntity.ok(postById);
     }
 
     @DeleteMapping("/delete/{id}")

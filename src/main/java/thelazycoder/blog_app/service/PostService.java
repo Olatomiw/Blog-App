@@ -2,13 +2,17 @@ package thelazycoder.blog_app.service;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import thelazycoder.blog_app.config.CloudinaryService;
 import thelazycoder.blog_app.dto.request.PostRequestDto;
 import thelazycoder.blog_app.dto.response.PostResponse;
 import thelazycoder.blog_app.exception.DuplicateEntityException;
@@ -23,8 +27,10 @@ import thelazycoder.blog_app.utils.GenericFieldValidator;
 import thelazycoder.blog_app.utils.InfoGetter;
 import thelazycoder.blog_app.utils.ResponseUtil;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @RequiredArgsConstructor
@@ -33,28 +39,34 @@ public class PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
     private final InfoGetter infoGetter;
+    private final CloudinaryService cloudinaryService;
     private final GenericFieldValidator genericFieldValidator;
     @Lazy
     private final WebSocketService webSocketService;
 
 
 
+    @CacheEvict(value = "AllPosts")
     @Transactional
-    public ResponseEntity<?> create(PostRequestDto postRequestDto){
+    public PostResponse create(PostRequestDto postRequestDto, MultipartFile file) throws IOException, ExecutionException, InterruptedException {
         User loggedInUser = infoGetter.getLoggedInUser();
 
-        Post post = createPost(postRequestDto, loggedInUser);
-        Post validated = genericFieldValidator.validate(post);
+        var imageUrl = cloudinaryService.uploadFile(file);
+
         Set<Category> categories =new HashSet<>(categoryRepository.findAllById(postRequestDto.categoryIds()));
-        checkDuplicateTitle(post.getTitle(), loggedInUser.getId());
+        checkDuplicateTitle(postRequestDto.title(), loggedInUser.getId());
+
+
+        Post post = createPost(postRequestDto, loggedInUser, imageUrl.get().get("secure_url").toString());
+        Post validated = genericFieldValidator.validate(post);
         post.setCategories(categories);
 
         Post savePost = postRepository.save(validated);
-        PostResponse postResponse = ModelMapper.mapToPostResponse(savePost);
-            return new ResponseEntity<>(ResponseUtil.success(postResponse, "Successfully created"), HttpStatus.OK);
+        return ModelMapper.mapToPostResponse(savePost);
     }
 
-    @Transactional
+    @Cacheable(value = "AllPosts")
+    @Transactional(readOnly = true)
     public ResponseEntity<?> findAllPost(){
         List<Post> all = postRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
         if (all.isEmpty()){
@@ -68,14 +80,14 @@ public class PostService {
     }
 
     @Transactional
-    public ResponseEntity<?> getPostById(String id){
+    public PostResponse getPostById(String id){
         Post post = postRepository.findById(id).orElseThrow(
                 () -> new NoEntityFoundException("Entity with id " + id + " not found"));
         PostResponse postResponse = ModelMapper.mapToPostResponse(post);
-        return new ResponseEntity<>(ResponseUtil.success(postResponse, "Successfully found post"),
-                HttpStatus.OK);
+        return postResponse;
     }
 
+    @CacheEvict(value = "AllPosts")
     @Transactional
     public ResponseEntity<?> deletePostById(String id){
         postRepository.deleteById(id);
@@ -92,12 +104,13 @@ public class PostService {
             throw new DuplicateEntityException("Change your post topic");
         }
     }
-    public Post createPost(PostRequestDto postRequestDto, User loggedInUser){
+    public Post createPost(PostRequestDto postRequestDto, User loggedInUser, String imageUrl){
         Post post = ModelMapper.mapToPost(postRequestDto);
         post.setId(UUID.randomUUID().toString());
         post.setAuthor(loggedInUser);
         post.setCreatedAt(LocalDateTime.now());
         post.setUpdatedAt(LocalDateTime.now());
+        post.setImageUrl(imageUrl);
         return post;
     }
 }
