@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,10 +17,12 @@ import org.springframework.web.multipart.MultipartFile;
 import thelazycoder.blog_app.dto.request.PostRequestDto;
 import thelazycoder.blog_app.dto.response.PostResponse;
 import thelazycoder.blog_app.service.PostService;
+import thelazycoder.blog_app.utils.InfoGetter;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.concurrent.ExecutionException;
 
 @Tag(name = "POST API", description = "Endpoints for managing posts")
@@ -29,9 +32,11 @@ import java.util.concurrent.ExecutionException;
 public class PostController {
 
     private final PostService postService;
+    private final InfoGetter infoGetter;
 
-    public PostController(PostService postService) {
+    public PostController(PostService postService, InfoGetter infoGetter) {
         this.postService = postService;
+        this.infoGetter = infoGetter;
     }
 
     @Operation(
@@ -82,6 +87,14 @@ public class PostController {
     @GetMapping("/getAllPost")
     public ResponseEntity<?> getPosts() {
         return postService.findAllPost();
+    }
+
+    @GetMapping("/personalized-feed")
+    public ResponseEntity<Page<PostResponse>> getPersonalizedFeed(@RequestParam(value = "start", defaultValue = "1") Integer start,
+                                                                  @RequestParam(value = "limit", defaultValue = "10") Integer limit) {
+        String id = infoGetter.getLoggedInUser().getId();
+        Page<PostResponse> feed = postService.getFeed(id, start, limit);
+        return ResponseEntity.ok(feed);
     }
 
     @GetMapping("/getPost/{id}")

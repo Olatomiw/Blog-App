@@ -5,6 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +24,10 @@ import thelazycoder.blog_app.mapper.ModelMapper;
 import thelazycoder.blog_app.model.Category;
 import thelazycoder.blog_app.model.Post;
 import thelazycoder.blog_app.model.User;
+import thelazycoder.blog_app.model.UserPreference;
 import thelazycoder.blog_app.repository.CategoryRepository;
 import thelazycoder.blog_app.repository.PostRepository;
+import thelazycoder.blog_app.repository.UserPreferenceRepository;
 import thelazycoder.blog_app.utils.GenericFieldValidator;
 import thelazycoder.blog_app.utils.InfoGetter;
 import thelazycoder.blog_app.utils.ResponseUtil;
@@ -41,6 +46,7 @@ public class PostService {
     private final InfoGetter infoGetter;
     private final CloudinaryService cloudinaryService;
     private final GenericFieldValidator genericFieldValidator;
+    private final UserPreferenceRepository preferenceRepository;
     @Lazy
     private final WebSocketService webSocketService;
 
@@ -87,11 +93,29 @@ public class PostService {
         return postResponse;
     }
 
-    @CacheEvict(value = "AllPosts")
+    @CacheEvict(cacheNames = {"UsersPost", "AllPosts"})
     @Transactional
     public ResponseEntity<?> deletePostById(String id){
         postRepository.deleteById(id);
         return new ResponseEntity<>(ResponseUtil.success(null, "Successfully deleted post"), HttpStatus.OK);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PostResponse> getFeed(String userId, int start, int limit) {
+        Optional<UserPreference> preference = preferenceRepository.findByUserId(userId);
+
+        // No preference record OR empty categories → return empty page
+        // Frontend uses this empty result to trigger the preference modal
+        if (preference.isEmpty() || preference.get().getPreferredCategories().isEmpty()) {
+            return Page.empty(PageRequest.of(start - 1, limit));
+        }
+
+        return postRepository
+                .findByCategoriesIn(
+                        preference.get().getPreferredCategories(),
+                        PageRequest.of(start - 1, limit, Sort.by(Sort.Direction.DESC, "createdAt"))
+                )
+                .map(ModelMapper::mapToPostResponse);
     }
 
 
