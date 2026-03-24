@@ -19,18 +19,17 @@ import java.util.concurrent.CompletableFuture;
 
 @Service
 public class CloudinaryService {
+
     final Cloudinary cloudinary;
     private final Map<String, Object> valuesMap = new HashMap<>();
 
-    @Value("${cloudinary.api-key}")
-    private String CLOUDINARY_KEY;
-    @Value("${cloudinary.api-secret}")
-    private String CLOUDINARY_SECRET;
-
-    public CloudinaryService(Environment environment) {
-        valuesMap.put("cloud_name", "dhtpu4w04");
-        valuesMap.put("api_key", CLOUDINARY_KEY);
-        valuesMap.put("api_secret", CLOUDINARY_SECRET);
+    public CloudinaryService(
+            @Value("${cloudinary.api-key}") String cloudinaryKey,
+            @Value("${cloudinary.api-secret}") String cloudinarySecret,
+            @Value("${cloudinary.cloud-name}") String cloudinaryCloudName) {
+        valuesMap.put("cloud_name", cloudinaryCloudName);
+        valuesMap.put("api_key", cloudinaryKey);
+        valuesMap.put("api_secret", cloudinarySecret);
         valuesMap.put("secure", true);
         cloudinary = new Cloudinary(valuesMap);
     }
