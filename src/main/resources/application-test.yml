@@ -46,7 +46,7 @@ cache:
   ttl-seconds: 60
 
 jwt:
-  secret-key: test-secret-key-that-is-long-enough-for-hs256-algorithm
+  secret: dGVzdC1zZWNyZXQta2V5LXRoYXQtaXMtbG9uZy1lbm91Z2gtZm9yLWhzMjU2
   expiration: 604800000
 
 logging:
