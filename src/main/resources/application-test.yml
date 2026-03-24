@@ -45,6 +45,10 @@ cloudinary:
 cache:
   ttl-seconds: 60
 
+jwt:
+  secret-key: test-secret-key-that-is-long-enough-for-hs256-algorithm
+  expiration: 604800000
+
 logging:
   level:
     root: WARN
