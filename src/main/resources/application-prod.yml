@@ -31,8 +31,9 @@ spring:
       max-request-size: 10MB
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
   cache:
     type: redis
   ai:
@@ -45,11 +46,11 @@ spring:
         completions-path: /v1beta/openai/chat/completions
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: ${SECRET_KEY}
   expiration: 604800000
 
 cloudinary:
-  api-key: ${CLOUDINARY_API_KEY}
+  api-key: ${CLOUDINARY_KEY}
   api-secret: ${CLOUDINARY_SECRET}
 
 logging:
