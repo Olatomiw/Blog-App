@@ -31,9 +31,9 @@ spring:
       max-request-size: 10MB
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      password: ${REDIS_PASSWORD}
+      host: ${REDISHOST}
+      port: ${REDISPORT}
+      password: ${REDISPASSWORD}
   cache:
     type: redis
   ai:
