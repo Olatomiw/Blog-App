@@ -45,9 +45,12 @@ public class  ModelMapper {
                 post.getTitle(),
                 post.getContent(),
                 post.getStatus(),
+                post.getImageUrl(),
                 post.getCreatedAt(),
                 post.getUpdatedAt(),
-                new AuthorDTO(post.getAuthor().getId(), post.getAuthor().getUsername()),
+                new AuthorDTO(post.getAuthor().getId(),
+                        post.getAuthor().getUsername(),
+                        post.getAuthor().getImage()),
                 post.getCategories().stream().map(
                         category -> new CategoryDTO(category.getId(), category.getName())
                 ).toList(),
@@ -56,7 +59,9 @@ public class  ModelMapper {
                                 comment.getId(),
                                 comment.getText(),
                                 comment.getCreatedAt(),
-                                new AuthorDTO(comment.getAuthor().getId(), comment.getAuthor().getUsername())
+                                new AuthorDTO(comment.getAuthor().getId(),
+                                        comment.getAuthor().getUsername(),
+                                        comment.getAuthor().getImage())
                         )
                 ).toList()
         );

@@ -5,16 +5,17 @@ import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+
 
 @Service
 public class CloudinaryService {
@@ -23,15 +24,16 @@ public class CloudinaryService {
 
     public CloudinaryService(Environment environment) {
         valuesMap.put("cloud_name", "dhtpu4w04");
-        valuesMap.put("api_key", environment.getProperty("cloud_api_key"));
-        valuesMap.put("api_secret", environment.getProperty("cloud_secret_key"));
+        valuesMap.put("api_key", environment.getProperty("CLOUDINARY_KEY"));
+        valuesMap.put("api_secret", environment.getProperty("CLOUDINARY_SECRET"));
         valuesMap.put("secure", true);
         cloudinary = new Cloudinary(valuesMap);
     }
 
-    public Map uploadFile(MultipartFile file) throws IOException {
-        File file_name = convert(file);
-        return cloudinary.uploader().upload(file_name, ObjectUtils.asMap());
+    @Async
+    public CompletableFuture<Map> uploadFile(MultipartFile file) throws IOException {
+        Map result = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+        return CompletableFuture.completedFuture(result);
     }
 
 

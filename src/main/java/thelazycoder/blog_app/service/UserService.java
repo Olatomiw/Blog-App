@@ -59,7 +59,7 @@ public class UserService {
         try {
             var result = cloudinaryService.uploadFile(multipartFile);
             user.setId(UUID.randomUUID().toString());
-            user.setImage((String) result.get("secure_url"));
+            user.setImage((String) result.get().get("secure_url"));
             user.setRole(Role.ADMIN);
             user.setCreated(LocalDateTime.now());
             user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -73,9 +73,9 @@ public class UserService {
                     userData
             );
             AuthDto authDto = new AuthDto(userDto.email(), userDto.password());
-            emailService.sendEmail(user.getEmail(),
-                    "SIGN UP SUCCESSFUL",
-                    "You have successfully SignedUp to BLOGAI");
+//            emailService.sendEmail(user.getEmail(),
+//                    "SIGN UP SUCCESSFUL",
+//                    "You have successfully SignedUp to BLOGAI");
             return new ResponseEntity<>(login(authDto), HttpStatus.OK);
         }catch (InvalidInputException e){
             throw e;
@@ -111,6 +111,7 @@ public class UserService {
         return new ResponseEntity<>(ResponseUtil.success(authResponse, "logged success"), HttpStatus.OK);
     }
 
+    @Cacheable(value = "UsersPost", key = "#id")
     @Transactional
     public ResponseEntity<?> getLoggedInUserPosts(){
         User loggedInUser = infoGetter.getLoggedInUser();

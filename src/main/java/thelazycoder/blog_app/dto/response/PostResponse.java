@@ -8,6 +8,7 @@ public record PostResponse (
         String title,
         String content,
         String status,
+        String imageUrl,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         AuthorDTO author,
