@@ -28,12 +28,6 @@ spring:
   cache:
     type: redis
 
-  mail:
-    host: localhost
-    port: 25
-    username: test@test.com
-    password: test
-
   ai:
     openai:
       api-key: test-key
