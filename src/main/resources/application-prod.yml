@@ -58,6 +58,7 @@ spring:
         completions-path: /v1beta/openai/chat/completions
 
 jwt:
+  secret: ${JWT_SECRET}
   expiration: 604800000
 
 cloudinary:
