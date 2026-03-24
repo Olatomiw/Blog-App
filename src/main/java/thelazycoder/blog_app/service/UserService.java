@@ -51,7 +51,6 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final InfoGetter infoGetter;
     private final WebSocketService webSocketService;
-    private final EmailService emailService;
 
     @Transactional
     public ResponseEntity<?> signUp(final UserDto userDto, MultipartFile multipartFile){
