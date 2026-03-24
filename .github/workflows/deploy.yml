@@ -66,6 +66,8 @@ jobs:
           CLOUDINARY_API_KEY: test-key
           CLOUDINARY_SECRET: test-secret
           CACHE_TTL_SECONDS: 60
+          SECRET_KEY: test-secret-key-that-is-long-enough-for-hs256-algorithm
+            # ... rest of your vars
 
   deploy:
     name: Deploy to Railway

@@ -19,7 +19,6 @@ import java.io.IOException;
 public class JwtFilterChain extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final CustomUserDetailsService userDetailsService;
     private final CustomUserDetailsService customUserDetailsService;
 
     @Override

@@ -28,12 +28,6 @@ spring:
   cache:
     type: redis
 
-  mail:
-    host: localhost
-    port: 25
-    username: test@test.com
-    password: test
-
   ai:
     openai:
       api-key: test-key
@@ -44,6 +38,10 @@ cloudinary:
 
 cache:
   ttl-seconds: 60
+
+jwt:
+  secret: dGVzdC1zZWNyZXQta2V5LXRoYXQtaXMtbG9uZy1lbm91Z2gtZm9yLWhzMjU2
+  expiration: 604800000
 
 logging:
   level:
